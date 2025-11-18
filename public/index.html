@@ -1,18 +1,477 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Time Manager</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Time Quest — Animated Avatar Walk</title>
+<style>
+  :root{
+    --mint:#DEFFF2;
+    --lavender:#E2C2FF;
+    --magenta:#c469c0;
+    --deep-purple:#a51080;
+    --orange:#ff6633;
+    --navy:#051116;
+    --radius:14px;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  body{background:var(--mint);color:var(--navy);transition:background .25s,color .25s}
+  body.dark{background:var(--navy);color:var(--mint)}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--lavender);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+  .controls{display:flex;gap:12px;align-items:center}
+  .mode-btn,.login-btn{background:none;border:0;cursor:pointer;font-size:18px;padding:6px 10px;border-radius:8px;color:var(--deep-purple)}
+  .login-btn{background:transparent;border:2px solid transparent}
+  main{display:flex;gap:20px;padding:20px;height:calc(100% - 80px);box-sizing:border-box}
+  .main-area{flex:1;display:flex;flex-direction:column;gap:18px}
+  .title-row{display:flex;align-items:center;justify-content:space-between}
+  h1{margin:0;font-size:20px;color:var(--deep-purple)}
+  .progress-panel{background:var(--lavender);padding:16px;border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+  .progress-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+  .tasks-remaining{font-weight:700;color:var(--deep-purple)}
+  .progress-track{position:relative;background:linear-gradient(90deg, rgba(226,194,255,.5), rgba(226,194,255,.5));height:28px;border-radius:999px;overflow:visible}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--magenta));width:0;border-radius:999px;transition:width .6s ease}
+  .avatar-on-track{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:26px;transition:left .6s ease;pointer-events:none}
+  /* walking bounce animation (Option A: Cute bounce) */
+  .avatar-on-track.walking{animation:walk-bounce .8s ease-in-out}
+  @keyframes walk-bounce{
+    0%{transform:translate(-50%,-50%) translateY(0)}
+    20%{transform:translate(-50%,-50%) translateY(-6px)}
+    40%{transform:translate(-50%,-50%) translateY(0)}
+    60%{transform:translate(-50%,-50%) translateY(-4px)}
+    100%{transform:translate(-50%,-50%) translateY(0)}
+  }
+  .task-list{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  .task-item{background:var(--mint);padding:10px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;border-left:6px solid var(--magenta);gap:12px}
+  .task-left{display:flex;flex-direction:column;gap:6px}
+  .task-meta{font-size:13px;color:var(--navy);opacity:.9}
+  .task-actions{display:flex;gap:8px;align-items:center}
+  .btn{cursor:pointer;border:0;padding:8px 12px;border-radius:10px;font-weight:600}
+  .btn.start{background:var(--magenta);color:white}
+  .btn.delete{background:transparent;border:2px solid rgba(0,0,0,.06)}
+  .quick-add{display:flex;gap:8px;margin-top:8px;align-items:center}
+  .quick-add input[type="text"], .quick-add input[type="number"], .quick-add select{padding:8px;border-radius:10px;border:2px solid rgba(0,0,0,.06);font-size:14px}
+  .quick-add button.add{background:var(--deep-purple);color:white;border:0;padding:10px 12px;border-radius:10px}
+  aside.inventory{width:220px;background:var(--lavender);padding:12px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.06);display:flex;flex-direction:column;align-items:center;gap:10px}
+  aside.inventory h3{margin:0;color:var(--deep-purple)}
+  .avatars{display:flex;flex-direction:column;gap:10px;width:100%;align-items:center}
+  .avatar-card{width:80%;background:var(--mint);padding:8px;border-radius:10px;display:flex;align-items:center;gap:10px;cursor:pointer;border:2px solid transparent}
+  .avatar-card.selected{border-color:var(--orange);box-shadow:0 6px 12px rgba(0,0,0,.06)}
+  .avatar-card span{font-size:22px}
+  .avatar-label{font-weight:600;color:var(--deep-purple)}
+  .modal-back{position:fixed;inset:0;background:rgba(5,17,22,.45);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal{background:var(--mint);padding:18px;border-radius:12px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .modal.dark{background:#0b1a22;color:var(--mint)}
+  .modal .row{margin-top:12px;display:flex;gap:8px}
+  .small{font-size:13px;color:#333}
+  .timer-box{display:flex;align-items:center;gap:12px;justify-content:space-between}
+  .time-large{font-size:20px;font-weight:700}
+  .completed{opacity:.6;text-decoration:line-through}
+  @media (max-width:900px){
+    main{flex-direction:column}
+    aside.inventory{width:100%;flex-direction:row;justify-content:space-around;padding:10px}
+  }
+</style>
 </head>
 <body>
-  <h1>Time Manager</h1>
-  <button id="darkToggle">Toggle Dark Mode</button>
-  <div id="motivationBanner"></div>
-  <script src="app.js"></script>
+<header>
+  <div class="left"></div>
+  <h1>Time Quest</h1>
+  <div class="controls">
+    <button class="login-btn" id="loginBtn">Log In</button>
+    <button class="mode-btn" id="modeBtn" title="Toggle theme">☀️</button>
+  </div>
+</header>
+
+<main>
+  <div class="main-area">
+    <section class="progress-panel" aria-labelledby="progressTitle">
+      <div class="progress-top">
+        <div>
+          <div id="progressTitle" class="tasks-remaining">0 Tasks Remaining</div>
+          <div class="small" id="progressSummary">0 completed • 0 total</div>
+        </div>
+        <div class="small">Avatar: <span id="currentAvatarLabel">None</span></div>
+      </div>
+
+      <div style="position:relative;">
+        <div class="progress-track" id="progressTrack">
+          <div class="progress-fill" id="progressFill"></div>
+          <div class="avatar-on-track" id="avatarMarker" style="left:0">🧍</div>
+        </div>
+      </div>
+
+      <div class="task-list" id="taskList">
+        <div class="small" id="noTasks">No tasks yet — add one below.</div>
+      </div>
+
+      <div class="quick-add" style="margin-top:12px">
+        <input id="qaName" type="text" placeholder="Task name" />
+        <input id="qaTime" type="number" min="1" placeholder="min" style="width:88px" />
+        <select id="qaDiff" style="width:110px">
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+        <button class="add" id="addQuickBtn">Add</button>
+      </div>
+    </section>
+
+    <aside class="inventory" aria-label="Inventory & avatar selection">
+      <h3>Choose Avatar</h3>
+      <div class="avatars" id="avatarList"></div>
+      <div style="margin-top:6px;font-size:13px;color:#333">Selected avatar moves on the bar.</div>
+    </aside>
+  </div>
+</main>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal" id="modal">
+    <div id="modalContent"></div>
+    <div class="row" id="modalActions"></div>
+  </div>
+</div>
+
+<script>
+/* Persistence and data */
+const STORAGE_KEY = "timeQuestData_v1";
+const defaultAvatars = [
+  { id: "bat", label: "Bat", emoji: "🦇" },
+  { id: "bear", label: "Brown Bear", emoji: "🧸" },
+  { id: "panda", label: "Panda", emoji: "🐼" },
+  { id: "hamster", label: "Hamster", emoji: "🐹" },
+  { id: "lion", label: "Lion", emoji: "🦁" }
+];
+
+let state = {
+  tasks: [],
+  selectedAvatarId: null,
+  activeTimer: null
+};
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ console.warn(e) }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+/* UI refs */
+const taskListEl = document.getElementById("taskList");
+const noTasksEl = document.getElementById("noTasks");
+const progressFill = document.getElementById("progressFill");
+const avatarMarker = document.getElementById("avatarMarker");
+const progressTitle = document.getElementById("progressTitle");
+const progressSummary = document.getElementById("progressSummary");
+const avatarListEl = document.getElementById("avatarList");
+const currentAvatarLabel = document.getElementById("currentAvatarLabel");
+
+const modalBack = document.getElementById("modalBack");
+const modal = document.getElementById("modal");
+const modalContent = document.getElementById("modalContent");
+const modalActions = document.getElementById("modalActions");
+
+const modeBtn = document.getElementById("modeBtn");
+const loginBtn = document.getElementById("loginBtn");
+const qaName = document.getElementById("qaName");
+const qaTime = document.getElementById("qaTime");
+const qaDiff = document.getElementById("qaDiff");
+const addQuickBtn = document.getElementById("addQuickBtn");
+
+/* Helpers */
+function uid(prefix="id"){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+function formatTime(sec){
+  const s = Math.max(0, Math.floor(sec));
+  const mm = Math.floor(s/60).toString().padStart(2,"0");
+  const ss = (s%60).toString().padStart(2,"0");
+  return `${mm}:${ss}`;
+}
+
+/* Render avatars list */
+function renderAvatars(){
+  avatarListEl.innerHTML = "";
+  for(const a of defaultAvatars){
+    const card = document.createElement("div");
+    card.className = "avatar-card";
+    if(state.selectedAvatarId === a.id) card.classList.add("selected");
+    card.innerHTML = `<span>${a.emoji}</span><div style="flex:1"><div class="avatar-label">${a.label}</div></div>`;
+    card.addEventListener("click", ()=>{
+      state.selectedAvatarId = a.id;
+      saveState();
+      render();
+      // small UI feedback
+      card.classList.add("selected");
+      setTimeout(()=> renderAvatars(), 250);
+    });
+    avatarListEl.appendChild(card);
+  }
+  currentAvatarLabel.textContent = state.selectedAvatarId ? (defaultAvatars.find(x=>x.id===state.selectedAvatarId)?.label || "None") : "None";
+}
+
+/* Compute progress percent */
+function computeProgressPercent(){
+  const total = state.tasks.length;
+  const completed = state.tasks.filter(t=>t.completed).length;
+  return total === 0 ? 0 : Math.round((completed/total)*100);
+}
+
+/* Animate avatar movement (cute bounce) */
+function animateAvatarTo(percent){
+  // update fill first (it will animate via CSS)
+  progressFill.style.width = percent + "%";
+  // move avatar marker; the left transition will animate
+  // add walking class for bounce effect
+  avatarMarker.style.left = percent + "%";
+  avatarMarker.classList.add("walking");
+  // remove walking after duration
+  setTimeout(()=> avatarMarker.classList.remove("walking"), 900);
+}
+
+/* Render tasks and progress (no walking) */
+function renderTasks(noAvatarWalk = true){
+  taskListEl.innerHTML = "";
+  const total = state.tasks.length;
+  const completedCount = state.tasks.filter(t=>t.completed).length;
+  const remaining = total - completedCount;
+  progressTitle.textContent = `${remaining} Tasks Remaining`;
+  progressSummary.textContent = `${completedCount} completed • ${total} total`;
+
+  const percent = computeProgressPercent();
+  // If requested, place avatar immediately (no walk). Normally used on load/render.
+  if(noAvatarWalk){
+    progressFill.style.width = percent + "%";
+    avatarMarker.style.left = percent + "%";
+  }
+
+  if(total === 0){
+    noTasksEl.style.display = "block";
+  } else {
+    noTasksEl.style.display = "none";
+    state.tasks.forEach(task => {
+      const row = document.createElement("div");
+      row.className = "task-item";
+      if(task.completed) row.classList.add("completed");
+
+      const left = document.createElement("div");
+      left.className = "task-left";
+      const title = document.createElement("div");
+      title.textContent = task.name;
+      const meta = document.createElement("div");
+      meta.className = "task-meta";
+      meta.textContent = `${task.minutes} min • ${task.difficulty}${task.completed ? " • Completed" : ""}`;
+      left.appendChild(title); left.appendChild(meta);
+
+      const actions = document.createElement("div");
+      actions.className = "task-actions";
+
+      const startBtn = document.createElement("button");
+      startBtn.className = "btn start";
+      startBtn.textContent = (state.activeTimer && state.activeTimer.taskId === task.id) ? "Running…" : "Start";
+      startBtn.disabled = (!!state.activeTimer && state.activeTimer.taskId !== task.id) || task.completed;
+      startBtn.addEventListener("click", ()=> startTaskTimer(task.id));
+
+      const del = document.createElement("button");
+      del.className = "btn delete";
+      del.textContent = "Delete";
+      del.addEventListener("click", ()=> {
+        if(state.activeTimer && state.activeTimer.taskId === task.id){
+          alert("Can't delete a task while its timer is running.");
+          return;
+        }
+        state.tasks = state.tasks.filter(t=>t.id !== task.id);
+        saveState(); renderTasks();
+      });
+
+      actions.appendChild(startBtn);
+      actions.appendChild(del);
+
+      row.appendChild(left);
+      row.appendChild(actions);
+      taskListEl.appendChild(row);
+    });
+  }
+}
+
+/* Start timer flow */
+function startTaskTimer(taskId){
+  if(state.activeTimer && state.activeTimer.taskId !== taskId) return;
+  const task = state.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  const remainingSeconds = (task._remainingSeconds !== undefined) ? task._remainingSeconds : task.minutes * 60;
+  openTimerModal(taskId, remainingSeconds);
+}
+
+/* Modal & timer */
+function openTimerModal(taskId, seconds){
+  const task = state.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  modalBack.style.display = "flex";
+  modal.classList.toggle("dark", document.body.classList.contains("dark"));
+  modalContent.innerHTML = `<div style="font-weight:700">${task.name}</div>
+    <div class="timer-box" style="margin-top:10px">
+      <div>
+        <div class="small">Time left</div>
+        <div class="time-large" id="timerDisplay">${formatTime(seconds)}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="small">Difficulty</div>
+        <div style="font-weight:700;margin-top:6px">${task.difficulty}</div>
+      </div>
+    </div>`;
+  modalActions.innerHTML = `<button class="btn" id="pauseBtn">Pause</button>
+    <button class="btn" id="stopBtn">Stop (Cancel)</button>`;
+
+  if(state.activeTimer && state.activeTimer.intervalId) clearInterval(state.activeTimer.intervalId);
+  state.activeTimer = { taskId, remainingSeconds: seconds, intervalId: null, _paused:false };
+  saveState();
+
+  const timerDisplay = document.getElementById("timerDisplay");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const stopBtn = document.getElementById("stopBtn");
+
+  let running = true;
+  pauseBtn.textContent = "Pause";
+  pauseBtn.onclick = ()=>{
+    if(running){
+      running = false;
+      pauseBtn.textContent = "Resume";
+      if(state.activeTimer.intervalId) clearInterval(state.activeTimer.intervalId);
+      state.activeTimer._paused = true;
+      saveState();
+    } else {
+      running = true;
+      pauseBtn.textContent = "Pause";
+      state.activeTimer._paused = false;
+      tick();
+      saveState();
+    }
+  };
+
+  stopBtn.onclick = ()=>{
+    if(state.activeTimer && state.activeTimer.intervalId) clearInterval(state.activeTimer.intervalId);
+    state.activeTimer = null;
+    delete task._remainingSeconds;
+    saveState();
+    closeModal();
+    renderTasks();
+  };
+
+  function tick(){
+    if(state.activeTimer.intervalId) clearInterval(state.activeTimer.intervalId);
+    state.activeTimer.intervalId = setInterval(()=>{
+      if(!running) return;
+      state.activeTimer.remainingSeconds -= 1;
+      timerDisplay.textContent = formatTime(state.activeTimer.remainingSeconds);
+      task._remainingSeconds = state.activeTimer.remainingSeconds;
+      saveState();
+      if(state.activeTimer.remainingSeconds <= 0){
+        clearInterval(state.activeTimer.intervalId);
+        showCompletePrompt(taskId);
+      }
+    }, 1000);
+  }
+  tick();
+  renderTasks();
+}
+
+/* Completion prompt */
+function showCompletePrompt(taskId){
+  const task = state.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  modalContent.innerHTML = `<div style="font-weight:800">Time's up — ${task.name}</div>
+    <div style="margin-top:10px" class="small">Is your task complete or do you need more time?</div>`;
+  modalActions.innerHTML = `<button class="btn" id="completeBtn" style="background:var(--orange);color:white">Complete</button>
+    <button class="btn" id="moreBtn" style="background:var(--magenta);color:white">Add More Time</button>`;
+
+  document.getElementById("completeBtn").onclick = ()=> {
+    // animate progress: compute previous and new percent
+    const total = state.tasks.length;
+    const prevCompleted = state.tasks.filter(t=>t.completed).length;
+    const prevPercent = total===0 ? 0 : Math.round((prevCompleted/total)*100);
+
+    // mark complete
+    task.completed = true;
+    delete task._remainingSeconds;
+    if(state.activeTimer && state.activeTimer.intervalId) clearInterval(state.activeTimer.intervalId);
+    state.activeTimer = null;
+    saveState();
+
+    // compute new percent then animate
+    const newCompleted = prevCompleted + 1;
+    const newPercent = total===0 ? 0 : Math.round((newCompleted/total)*100);
+
+    // animate avatar walking across
+    animateAvatarTo(newPercent);
+
+    // close modal after a short delay to let animation start
+    setTimeout(()=> {
+      closeModal();
+      renderTasks();
+    }, 300);
+  };
+
+  document.getElementById("moreBtn").onclick = ()=> {
+    modalContent.innerHTML = `<div style="font-weight:800">Add more time for "${task.name}"</div>
+      <div class="row" style="margin-top:12px">
+        <input id="extraMinutes" type="number" min="1" placeholder="minutes" style="padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,.08)" />
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="addOk" style="background:var(--deep-purple);color:white">Add & Resume</button>
+        <button class="btn" id="addCancel">Cancel</button>
+      </div>`;
+    document.getElementById("addOk").onclick = ()=>{
+      const v = parseInt(document.getElementById("extraMinutes").value || "0",10);
+      if(!v || v <= 0){ alert("Enter minutes to add."); return; }
+      const added = v * 60;
+      const remaining = (task._remainingSeconds !== undefined ? task._remainingSeconds : 0) + added;
+      delete task._remainingSeconds;
+      saveState();
+      openTimerModal(taskId, remaining);
+    };
+    document.getElementById("addCancel").onclick = ()=> {
+      showCompletePrompt(taskId);
+    };
+  };
+}
+
+/* Quick add */
+addQuickBtn.addEventListener("click", ()=>{
+  const name = qaName.value.trim();
+  const minutes = parseInt(qaTime.value,10);
+  const diff = qaDiff.value;
+  if(!name || !minutes || minutes<=0){ alert("Please enter a valid name and time in minutes."); return; }
+  const newTask = { id: uid("task"), name, minutes, difficulty: diff, completed:false };
+  state.tasks.push(newTask);
+  qaName.value=""; qaTime.value=""; qaDiff.value="Easy";
+  saveState(); renderTasks();
+});
+
+/* Modal helpers */
+function closeModal(){ modalBack.style.display = "none"; modalContent.innerHTML = ""; modalActions.innerHTML = ""; }
+
+/* Click outside to close only if no active timer */
+modalBack.addEventListener("click", (e)=>{
+  if(e.target === modalBack){
+    if(!state.activeTimer) closeModal();
+  }
+});
+
+/* Theme + login */
+modeBtn.addEventListener("click", ()=>{
+  document.body.classList.toggle("dark");
+  modeBtn.textContent = document.body.classList.contains("dark") ? "🌙" : "☀️";
+  modal.classList.toggle("dark", document.body.classList.contains("dark"));
+});
+loginBtn.addEventListener("click", ()=> alert("Login placeholder — integrate auth here."));
+
+/* Initial load & render */
+function render(){
+  renderAvatars();
+  renderTasks();
+  saveState();
+}
+loadState();
+render();
+</script>
 </body>
 </html>
-
-
-
-
