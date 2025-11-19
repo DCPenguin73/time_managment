@@ -6,8 +6,8 @@
 <title>Time Quest — Animated Avatar Walk</title>
 <style>
   :root{
-    --mint:#DEFFF2;
-    --lavender:#E2C2FF;
+    --white:#ffffff;
+    --lavender:#c7d2ff;
     --magenta:#c469c0;
     --deep-purple:#a51080;
     --orange:#ff6633;
@@ -15,8 +15,8 @@
     --radius:14px;
   }
   html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-  body{background:var(--mint);color:var(--navy);transition:background .25s,color .25s}
-  body.dark{background:var(--navy);color:var(--mint)}
+  body{background:var(--white);color:var(--navy);transition:background .25s,color .25s}
+  body.dark{background:var(--navy);color:var(--white)}
   header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--lavender);box-shadow:0 2px 6px rgba(0,0,0,.06)}
   .controls{display:flex;gap:12px;align-items:center}
   .mode-btn,.login-btn{background:none;border:0;cursor:pointer;font-size:18px;padding:6px 10px;border-radius:8px;color:var(--deep-purple)}
@@ -41,7 +41,7 @@
     100%{transform:translate(-50%,-50%) translateY(0)}
   }
   .task-list{margin-top:12px;display:flex;flex-direction:column;gap:8px}
-  .task-item{background:var(--mint);padding:10px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;border-left:6px solid var(--magenta);gap:12px}
+  .task-item{background:var(--white);padding:10px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;border-left:6px solid var(--magenta);gap:12px}
   .task-left{display:flex;flex-direction:column;gap:6px}
   .task-meta{font-size:13px;color:var(--navy);opacity:.9}
   .task-actions{display:flex;gap:8px;align-items:center}
@@ -54,13 +54,13 @@
   aside.inventory{width:220px;background:var(--lavender);padding:12px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.06);display:flex;flex-direction:column;align-items:center;gap:10px}
   aside.inventory h3{margin:0;color:var(--deep-purple)}
   .avatars{display:flex;flex-direction:column;gap:10px;width:100%;align-items:center}
-  .avatar-card{width:80%;background:var(--mint);padding:8px;border-radius:10px;display:flex;align-items:center;gap:10px;cursor:pointer;border:2px solid transparent}
+  .avatar-card{width:80%;background:var(--white);padding:8px;border-radius:10px;display:flex;align-items:center;gap:10px;cursor:pointer;border:2px solid transparent}
   .avatar-card.selected{border-color:var(--orange);box-shadow:0 6px 12px rgba(0,0,0,.06)}
   .avatar-card span{font-size:22px}
   .avatar-label{font-weight:600;color:var(--deep-purple)}
   .modal-back{position:fixed;inset:0;background:rgba(5,17,22,.45);display:none;align-items:center;justify-content:center;z-index:50}
-  .modal{background:var(--mint);padding:18px;border-radius:12px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
-  .modal.dark{background:#0b1a22;color:var(--mint)}
+  .modal{background:var(--white);padding:18px;border-radius:12px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .modal.dark{background:#0b1a22;color:var(--white)}
   .modal .row{margin-top:12px;display:flex;gap:8px}
   .small{font-size:13px;color:#333}
   .timer-box{display:flex;align-items:center;gap:12px;justify-content:space-between}
@@ -83,16 +83,16 @@
 </header>
 
 <main>
-  <div class="main-area">
-    <section class="progress-panel" aria-labelledby="progressTitle">
-      <div class="progress-top">
-        <div>
-          <div id="progressTitle" class="tasks-remaining">0 Tasks Remaining</div>
-          <div class="small" id="progressSummary">0 completed • 0 total</div>
-        </div>
-        <div class="small">Avatar: <span id="currentAvatarLabel">None</span></div>
-      </div>
+ <div class="main-area">
 
+  <!-- INVENTORY MOVED ABOVE -->
+  <aside class="inventory" aria-label="Inventory & avatar selection">
+    <h3>Choose Avatar</h3>
+    <div class="avatars" id="avatarList"></div>
+    <div style="margin-top:6px;font-size:13px;color:#333">Selected avatar moves on the bar.</div>
+  </aside>
+
+  <section class="progress-panel" aria-labelledby="progressTitle">
       <div style="position:relative;">
         <div class="progress-track" id="progressTrack">
           <div class="progress-fill" id="progressFill"></div>
@@ -115,12 +115,50 @@
         <button class="add" id="addQuickBtn">Add</button>
       </div>
     </section>
+    <style>
+        aside.inventory {
+  width: 100%;
+  background: var(--lavender);
+  padding: 12px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  
+  /* NEW — make it horizontal */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
 
-    <aside class="inventory" aria-label="Inventory & avatar selection">
-      <h3>Choose Avatar</h3>
-      <div class="avatars" id="avatarList"></div>
-      <div style="margin-top:6px;font-size:13px;color:#333">Selected avatar moves on the bar.</div>
-    </aside>
+aside.inventory h3 {
+  margin: 0;
+  color: var(--deep-purple);
+  white-space: nowrap;
+}
+
+.avatars {
+  display: flex;
+  flex-direction: row; /* horizontal avatar cards */
+  gap: 12px;
+  width: auto;
+  align-items: center;
+}
+
+.avatar-card {
+  width: auto;
+  min-width: 110px;
+  background: var(--white);
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+    </style>
   </div>
 </main>
 
@@ -195,19 +233,27 @@ function renderAvatars(){
     card.className = "avatar-card";
     if(state.selectedAvatarId === a.id) card.classList.add("selected");
     card.innerHTML = `<span>${a.emoji}</span><div style="flex:1"><div class="avatar-label">${a.label}</div></div>`;
+    
+    // Click to select avatar
     card.addEventListener("click", ()=>{
       state.selectedAvatarId = a.id;
       saveState();
-      render();
-      // small UI feedback
-      card.classList.add("selected");
-      setTimeout(()=> renderAvatars(), 250);
+      renderAvatars();         // re-render to show selection
+      updateAvatarMarker();     // update marker on progress bar
     });
+
     avatarListEl.appendChild(card);
   }
-  currentAvatarLabel.textContent = state.selectedAvatarId ? (defaultAvatars.find(x=>x.id===state.selectedAvatarId)?.label || "None") : "None";
 }
 
+function updateAvatarMarker() {
+  if(!state.selectedAvatarId){
+    avatarMarker.textContent = "🧍"; // default placeholder
+    return;
+  }
+  const selected = defaultAvatars.find(a => a.id === state.selectedAvatarId);
+  avatarMarker.textContent = selected ? selected.emoji : "🧍";
+}
 /* Compute progress percent */
 function computeProgressPercent(){
   const total = state.tasks.length;
@@ -217,16 +263,11 @@ function computeProgressPercent(){
 
 /* Animate avatar movement (cute bounce) */
 function animateAvatarTo(percent){
-  // update fill first (it will animate via CSS)
   progressFill.style.width = percent + "%";
-  // move avatar marker; the left transition will animate
-  // add walking class for bounce effect
   avatarMarker.style.left = percent + "%";
   avatarMarker.classList.add("walking");
-  // remove walking after duration
   setTimeout(()=> avatarMarker.classList.remove("walking"), 900);
 }
-
 /* Render tasks and progress (no walking) */
 function renderTasks(noAvatarWalk = true){
   taskListEl.innerHTML = "";
@@ -236,12 +277,13 @@ function renderTasks(noAvatarWalk = true){
   progressTitle.textContent = `${remaining} Tasks Remaining`;
   progressSummary.textContent = `${completedCount} completed • ${total} total`;
 
-  const percent = computeProgressPercent();
-  // If requested, place avatar immediately (no walk). Normally used on load/render.
+   const percent = computeProgressPercent();
   if(noAvatarWalk){
     progressFill.style.width = percent + "%";
     avatarMarker.style.left = percent + "%";
   }
+
+  updateAvatarMarker();
 
   if(total === 0){
     noTasksEl.style.display = "block";
