@@ -1,39 +1,80 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Time Manager</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <h1>Time Manager</h1>
-  <button id="darkToggle">Toggle Dark Mode</button>
-  <div id="motivationBanner"></div>
-  <script src="app.js"></script>
-</body>
-</html>
-
- -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Time Manager</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Time Manager</h1>
-  <button id="darkToggle">Toggle Dark Mode</button>
-  <div id="motivationBanner"></div>
-  <div id="checkbox-list"></div>
+  <main class="container">
+    <header>
+      <h1>Time Manager</h1>
+      <button id="darkToggle" aria-label="Toggle dark mode">Toggle Dark Mode</button>
+      <button class="mode-btn" id="filterBtn" title="Show completed or incomplete">
+        Show: Incomplete
+      </button>
+    </header>
 
-  <!-- Firebase SDKs -->
+    <!-- AUTH SECTION -->
+    <section id="auth">
+      <div class="auth-row">
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Password" />
+      </div>
+      <div class="auth-row">
+        <button id="signUpBtn">Sign up</button>
+        <button id="signInBtn">Sign in</button>
+        <button id="signOutBtn" disabled>Sign out</button>
+      </div>
+      <div id="authStatus" class="muted">Signed out</div>
+    </section>
+
+    <!-- TASK APP SECTION (hidden until signed in) -->
+    <section id="taskApp" hidden>
+      <div id="addTask" class="add-task">
+        <input id="newTaskName" type="text" placeholder="Task name" />
+        <input id="newTaskDue" type="date" />
+        <input id="newTaskExpected" type="number" min="0" placeholder="Expected minutes" />
+        <input id="newTaskCategory" type="text" placeholder="Category" />
+        <input id="newTaskDescription" type="text" placeholder="Description" />
+
+        <select id="newTaskPriority">
+          <option value="normal">Normal Priority</option>
+          <option value="high">High Priority</option>
+        </select>
+
+        <select id="sortMode">
+          <option value="priorityThenDue">Sort: Priority → Due Date</option>
+          <option value="priority">Sort: Priority Only</option>
+          <option value="dueDate">Sort: Due Date Only</option>
+        </select>
+
+        <button id="addTaskBtn">Add Task</button>
+
+      </div>
+
+      <h2 id="tasksHeader">Your tasks</h2>
+
+      <div id="checkbox-list" class="task-list"></div>
+    </section>
+
+    <footer>
+      <div id="motivationBanner" class="muted">
+        Welcome — sign in to see your tasks.
+      </div>
+    </footer>
+  </main>
+
+  <!-- Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <!-- Your scripts -->
+  <!-- App scripts (relative to index.html inside public/) -->
+  <script src="firebase-init.js"></script>
+  <script src="auth.js"></script>
+  <script src="tasks.js"></script>
   <script src="app.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
