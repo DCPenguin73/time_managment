@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "time-management-e095d"
-  }
+    "staging": "time-management-e095d"
+  },
+  "targets": {},
+  "etags": {}
 }
