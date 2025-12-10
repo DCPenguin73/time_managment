@@ -1,17 +1,17 @@
 :root {
   --bg: #ffffff;
   --card: #f7f7f8;
-  --text: #111;
+  --text: #a51080;
   --muted: #666;
-  --accent: #2b8ae2;
+  --accent: #65b0f7;
 }
 
 [data-theme="dark"] {
   --bg: #0f1115;
-  --card: #15181c;
-  --text: #e6eef6;
-  --muted: #9aa4b2;
-  --accent: #66a9ff;
+  --card: black ;
+  --text: #a51080;
+  --muted: white;
+  --accent: #65b0f7;
 }
 
 * {
@@ -21,28 +21,61 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: var(--bg);
+  background-color:white;
   color: var(--text);
   min-height: 100vh;
+
+  text-align: center;
 }
 
 .container {
-  max-width: 760px;
-  margin: 24px auto;
+ /* margin: 24px auto;*/
   padding: 16px;
+ 
 }
+
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  background-color:  #e2c2ff;
+  padding: 1rem 2rem;
+}
+#header_buttons {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: right;
+  width: 40%;
+  
 }
 
+.theme-btn {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+#auth{
+  display: flex;
+  justify-self: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--card);
+  border-radius: 8px;
+  margin: 15px;
+  margin-top: 55px;
+  width: 500px;
+}
 .auth-row {
   display: flex;
   gap: 8px;
-  margin: 8px 0;
+  margin: 16px 0;
+  justify-content: space-around;
 }
 
 input[type="text"],
@@ -60,7 +93,7 @@ select {
 
 button {
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: 1.5rem;
   border: none;
   background: var(--accent);
   color: #fff;
@@ -68,6 +101,10 @@ button {
   white-space: nowrap;
 }
 
+button:hover {
+  background: #0b395f;
+  scale: 1.05;
+}
 button[disabled] {
   opacity: 0.5;
   cursor: default;
@@ -227,3 +264,14 @@ button[disabled] {
   transition: left 0.4s ease;
 }
 
+#task_list_section {
+  display: flex;
+  justify-self: center;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--card);
+  border-radius: 8px;
+  margin: 15px;
+  margin-top: 55px;
+}
