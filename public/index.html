@@ -3,22 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Time Manager</title>
+  <title>Time Quest</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="container">
     <header>
-      <h1>Time Manager</h1>
-      <button id="darkToggle" aria-label="Toggle dark mode">Toggle Dark Mode</button>
-      <button class="mode-btn" id="filterBtn" title="Show completed or incomplete">
+      <h1>Time Quest</h1>
+      <div id="header_buttons"> 
+        <!--<button id="darkToggle" aria-label="Toggle dark mode">Toggle Dark Mode</button>-->
+        <button id="theme-toggle" class="theme-btn">☀️</button>
+        <button class="mode-btn" id="filterBtn" title="Show completed or incomplete">
         Show: Incomplete
       </button>
+      </div>
+     
     </header>
 
     <!-- AUTH SECTION -->
     <section id="auth">
-      <div class="auth-row">
+      <div class="auth-row" id="auth-row-top">
         <input id="email" type="email" placeholder="Email" />
         <input id="password" type="password" placeholder="Password" />
       </div>
@@ -53,7 +57,9 @@
         <button id="addTaskBtn">Add Task</button>
 
       </div>
+      <section id="task_list_section">
 
+      </section>
       <h2 id="tasksHeader">Your tasks</h2>
 
       <div id="checkbox-list" class="task-list"></div>
@@ -76,5 +82,15 @@
   <script src="auth.js"></script>
   <script src="tasks.js"></script>
   <script src="app.js"></script>
+
+  <!-- === Theme toggle ===    --> 
+  <script> 
+   themeToggle.addEventListener("click", () => {
+      body.classList.toggle("dark-mode");
+      body.classList.toggle("light-mode");
+      themeToggle.textContent = body.classList.contains("dark-mode") ? "🌙" : "☀️";
+    });
+  </script>
+   
 </body>
 </html>
